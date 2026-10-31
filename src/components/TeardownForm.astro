@@ -1,0 +1,265 @@
+---
+import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
+import { site, isPlaceholder } from '../config';
+import { form, confirmation, exportLinks } from '../content/copy';
+
+const configured = !isPlaceholder(site.formEndpoint);
+const fill = (s: string, vars: Record<string, string>) => s.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m);
+const fx = form.fields;
+const inputCls =
+  'block w-full rounded-md border border-rule-strong bg-surface px-3 py-2.5 text-[16px] text-ink placeholder:text-ink-2 hover:border-ink-2 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30';
+const labelCls = 'mb-1.5 block text-[14px] font-medium';
+---
+
+<div class="rounded-lg border border-rule bg-surface p-5 md:p-8">
+  <form
+    id="teardown-form"
+    action={configured ? site.formEndpoint : `mailto:${site.email}`}
+    method="POST"
+    novalidate
+    data-configured={String(configured)}
+    data-dev={String(import.meta.env.DEV)}
+    data-msg-error={fill(form.error, { email: site.email })}
+    data-msg-unconfigured={fill(form.notConfigured, { email: site.email })}
+  >
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        <label for="f-name" class={labelCls}>{fx.name.label}</label>
+        <input id="f-name" name="name" type="text" required autocomplete={fx.name.autocomplete} class={inputCls} />
+      </div>
+      <div>
+        <label for="f-email" class={labelCls}>{fx.email.label}</label>
+        <input id="f-email" name="email" type="email" required autocomplete={fx.email.autocomplete} class={inputCls} />
+      </div>
+      <div class="sm:col-span-2">
+        <label for="f-company" class={labelCls}>{fx.company.label}</label>
+        <input id="f-company" name="company" type="text" required autocomplete={fx.company.autocomplete} class={inputCls} />
+      </div>
+
+      <fieldset class="sm:col-span-2" id="f-providers" aria-describedby="f-providers-hint f-providers-error">
+        <legend class={labelCls}>{fx.providers.legend}</legend>
+        <p id="f-providers-hint" class="-mt-1 mb-2.5 text-[13px] text-ink-2">{fx.providers.hint}</p>
+        <div class="grid gap-2 sm:grid-cols-2">
+          {
+            fx.providers.options.map((o) => (
+              <label class="choice">
+                <input type="checkbox" name="providers" value={o.value} />
+                <span>{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+        <p id="f-providers-error" class="field-error" hidden>{fx.providers.error}</p>
+      </fieldset>
+
+      <fieldset class="sm:col-span-2" id="f-spend" aria-describedby="f-spend-error">
+        <legend class={labelCls}>{fx.spend.legend}</legend>
+        <div class="grid gap-2 sm:grid-cols-2">
+          {
+            fx.spend.options.map((o, i) => (
+              <label class="choice">
+                <input type="radio" name="spend" value={o} required={i === 0} />
+                <span class="num text-[14px]">{o}</span>
+              </label>
+            ))
+          }
+        </div>
+        <p id="f-spend-error" class="field-error" hidden>{fx.spend.error}</p>
+      </fieldset>
+
+      <div class="sm:col-span-2">
+        <label for="f-renewal" class={labelCls}>
+          {fx.renewal.label} <span class="font-normal text-ink-2">({fx.renewal.optional})</span>
+        </label>
+        <input id="f-renewal" name="renewal" type="text" placeholder={fx.renewal.placeholder} class={inputCls} />
+      </div>
+      <div class="sm:col-span-2">
+        <label for="f-notes" class={labelCls}>
+          {fx.notes.label} <span class="font-normal text-ink-2">({fx.notes.optional})</span>
+        </label>
+        <textarea id="f-notes" name="notes" rows="4" placeholder={fx.notes.placeholder} class={inputCls}></textarea>
+      </div>
+
+      <!-- Spam trap: hidden from people, filled by bots. Formspree drops these. -->
+      <div class="hidden" aria-hidden="true">
+        <label>Leave empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
+      </div>
+      <input type="hidden" name="_subject" value="Teardown request" />
+    </div>
+
+    <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <button type="submit" class="btn btn-primary justify-center" data-label={form.submit} data-sending={form.sending}>
+        {form.submit}
+      </button>
+      <p class="text-[13px] text-ink-2">{form.fineprint}</p>
+    </div>
+    <p id="form-status" class="field-error mt-4" role="alert" hidden></p>
+  </form>
+
+  <div id="teardown-confirmation" hidden tabindex="-1" aria-live="polite">
+    <h3 class="text-[24px] font-semibold tracking-[-0.01em]">{confirmation.heading}</h3>
+    <p class="mt-2 text-ink-2" data-intro={confirmation.intro}></p>
+    <ol class="mt-6 space-y-3">
+      {
+        confirmation.steps.map((s, i) => (
+          <li class="grid grid-cols-[28px_1fr] gap-2 text-[15px]">
+            <span class="num text-ink-2">{String(i + 1).padStart(2, '0')}</span>
+            <span>{fill(s, { email: site.email })}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <h4 class="mt-8 text-[15px] font-semibold">{confirmation.linksHeading}</h4>
+    <p class="text-[13px] text-ink-2">{confirmation.linksNote}</p>
+    <ul class="mt-4 divide-y divide-rule border-y border-rule" id="export-links">
+      {
+        Object.entries(exportLinks).map(([key, p]) => (
+          <li class="py-3.5" data-provider={key}>
+            <p class="text-[15px] font-medium">{p.name}</p>
+            <p class="mt-0.5 text-[14px] text-ink-2">{p.how}</p>
+            <p class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[14px]">
+              {p.links.map((l) => (
+                <a class="link" href={l.href} target="_blank" rel="noopener">
+                  {l.label}
+                  <ArrowUpRight size={13} class="ml-0.5 inline align-[-1px]" aria-hidden="true" />
+                </a>
+              ))}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-4 text-[13px] text-ink-2">{confirmation.roleNote} {confirmation.checked}</p>
+  </div>
+</div>
+
+<style>
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 15px;
+    cursor: pointer;
+    transition: border-color 120ms ease;
+  }
+  .choice:hover {
+    border-color: var(--ink-2);
+  }
+  .choice:has(input:checked) {
+    border-color: var(--accent);
+  }
+  .choice:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .choice input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex: none;
+  }
+  .choice input:focus-visible {
+    outline: none;
+  }
+  :global(.field-error) {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--bad);
+  }
+  :global([aria-invalid='true']) {
+    border-color: var(--bad) !important;
+  }
+</style>
+
+<script>
+  const formEl = document.getElementById('teardown-form') as HTMLFormElement | null;
+  const done = document.getElementById('teardown-confirmation') as HTMLElement | null;
+
+  if (formEl && done) {
+    const status = document.getElementById('form-status') as HTMLElement;
+    const button = formEl.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const configured = formEl.dataset.configured === 'true';
+    const isDev = formEl.dataset.dev === 'true';
+
+    const showError = (id: string, show: boolean) => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = !show;
+    };
+
+    const validate = () => {
+      let firstBad: HTMLElement | null = null;
+      for (const id of ['f-name', 'f-email', 'f-company']) {
+        const input = document.getElementById(id) as HTMLInputElement;
+        const ok = input.checkValidity();
+        input.setAttribute('aria-invalid', String(!ok));
+        if (!ok && !firstBad) firstBad = input;
+      }
+      const providersOk = formEl.querySelectorAll('input[name="providers"]:checked').length > 0;
+      showError('f-providers-error', !providersOk);
+      if (!providersOk && !firstBad) firstBad = formEl.querySelector('input[name="providers"]');
+      const spendOk = !!formEl.querySelector('input[name="spend"]:checked');
+      showError('f-spend-error', !spendOk);
+      if (!spendOk && !firstBad) firstBad = formEl.querySelector('input[name="spend"]');
+      firstBad?.focus();
+      return !firstBad;
+    };
+
+    const showConfirmation = (data: FormData) => {
+      const name = String(data.get('name') || '').trim().split(/\s+/)[0] || 'there';
+      const intro = done.querySelector('[data-intro]') as HTMLElement;
+      intro.textContent = (intro.dataset.intro || '').replace('{name}', name);
+      // Put the providers they selected first.
+      const chosen = data.getAll('providers').map(String);
+      const list = document.getElementById('export-links')!;
+      [...chosen].reverse().forEach((p) => {
+        const li = list.querySelector(`[data-provider="${p}"]`);
+        if (li) list.prepend(li);
+      });
+      formEl.hidden = true;
+      done.hidden = false;
+      done.focus();
+      (window as any).plausible?.('Teardown Request');
+    };
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      if (!validate()) return;
+      const data = new FormData(formEl);
+
+      if (!configured) {
+        // Local development: show the confirmation without sending anything.
+        if (isDev) return showConfirmation(data);
+        status.textContent = formEl.dataset.msgUnconfigured || '';
+        status.hidden = false;
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = button.dataset.sending || 'Sending';
+      try {
+        const res = await fetch(formEl.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error(String(res.status));
+        showConfirmation(data);
+      } catch {
+        status.textContent = formEl.dataset.msgError || '';
+        status.hidden = false;
+      } finally {
+        button.disabled = false;
+        button.textContent = button.dataset.label || 'Request teardown';
+      }
+    });
+
+    formEl.addEventListener('input', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.getAttribute('aria-invalid') === 'true' && t.checkValidity()) t.setAttribute('aria-invalid', 'false');
+      if (t.name === 'providers') showError('f-providers-error', false);
+      if (t.name === 'spend') showError('f-spend-error', false);
+    });
+  }
+</script>

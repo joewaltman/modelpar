@@ -1,0 +1,59 @@
+---
+// Horizontal bar chart drawn with plain HTML so it stays crisp, themable and printable.
+import { usd } from '../lib/sample';
+
+interface Props {
+  title: string;
+  rows: { name: string; cost: number; share: number }[];
+}
+const { title, rows } = Astro.props;
+const max = Math.max(...rows.map((r) => r.cost));
+---
+
+<figure class="chart m-0">
+  <figcaption class="mb-3 text-[13px] font-medium text-ink">{title}</figcaption>
+  <ol class="m-0 list-none space-y-1.5 p-0">
+    {
+      rows.map((r) => (
+        <li class="chart-row grid items-center gap-x-3 gap-y-1">
+          <span class="num truncate text-[12px] text-ink-2" title={r.name}>
+            {r.name}
+          </span>
+          <span class="chart-track block h-[14px]">
+            <span class="chart-bar block h-full rounded-[2px] bg-chart" style={`width: ${((r.cost / max) * 100).toFixed(2)}%`} />
+          </span>
+          <span class="num text-right text-[12px]">{usd(r.cost)}</span>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .chart-row {
+    grid-template-columns: minmax(0, 1fr) 76px;
+  }
+  .chart-row > :first-child {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 640px) {
+    .chart-row {
+      grid-template-columns: 230px minmax(0, 1fr) 76px;
+    }
+    .chart-row > :first-child {
+      grid-column: auto;
+    }
+  }
+  @media print {
+    .chart-row {
+      grid-template-columns: 200px minmax(0, 1fr) 70px;
+    }
+    .chart-row > :first-child {
+      grid-column: auto;
+    }
+    .chart-bar {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+  }
+</style>

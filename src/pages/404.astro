@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import { meta, notFound } from '../content/copy';
+---
+
+<Base title={meta.notFound.title} description={meta.notFound.description} path="/404" noindex>
+  <div class="wrap py-24 md:py-36">
+    <p class="num text-[14px] text-ink-2">{notFound.code}</p>
+    <h1 class="mt-3 max-w-[18ch] text-[38px] font-semibold leading-[1.1] tracking-[-0.025em] md:text-[52px]">{notFound.heading}</h1>
+    <p class="mt-4 text-ink-2">{notFound.body}</p>
+    <div class="mt-9 flex flex-wrap gap-3">
+      <a href="/" class="btn btn-primary">{notFound.home}</a>
+      <a href="/sample" class="btn btn-secondary">{notFound.sample}</a>
+    </div>
+  </div>
+</Base>

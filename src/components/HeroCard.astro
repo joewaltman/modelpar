@@ -1,0 +1,73 @@
+---
+// A small excerpt of the sample report: input price per 1M tokens, now vs achievable.
+import Logo from './Logo.astro';
+import { hero } from '../content/copy';
+import { prices, workloads, effIn, usd2, tiers } from '../lib/sample';
+import { scenarios } from '../content/sample-data';
+
+const c = hero.card;
+const rows = [
+  {
+    ...c.rows[0],
+    model: prices.sonnet.id,
+    list: prices.sonnet.in,
+    paying: effIn(prices.sonnet, workloads.support.t),
+    could: effIn(prices.sonnet, scenarios.supportCachingFixed),
+  },
+  {
+    ...c.rows[1],
+    model: prices.sol.id,
+    list: prices.sol.in,
+    paying: effIn(prices.sol, workloads.extract.t),
+    could: effIn(prices.sol, workloads.extract.t) * tiers.batchFactor,
+  },
+  {
+    ...c.rows[2],
+    model: prices.flash.id,
+    list: prices.flash.in,
+    paying: effIn(prices.flash, workloads.calls.t),
+    could: prices.flashLite31.in,
+  },
+];
+---
+
+<figure class="m-0">
+  <div class="rounded-lg border border-rule bg-surface">
+    <div class="flex items-center justify-between gap-4 border-b border-rule px-5 py-3">
+      <span class="text-ink" aria-hidden="true"><Logo height={13} /></span>
+      <span class="label text-[12px]">{c.meta}</span>
+    </div>
+    <div class="px-5 pb-4 pt-4">
+      <p class="mb-3 text-[14px] font-medium">{c.title}</p>
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">{c.columns[0]}</th>
+            <th scope="col" class="r hidden sm:table-cell">{c.columns[1]}</th>
+            <th scope="col" class="r">{c.columns[2]}</th>
+            <th scope="col" class="r">{c.columns[3]}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((r) => (
+              <tr>
+                <td>
+                  <span class="block text-[14px]">{r.workload}</span>
+                  <span class="num block whitespace-nowrap text-[12px] text-ink-2">{r.model}</span>
+                </td>
+                <td class="r hidden text-ink-2 sm:table-cell">{usd2(r.list)}</td>
+                <td class="r">{usd2(r.paying)}</td>
+                <td class="r">
+                  <span class="font-semibold text-accent">{usd2(r.could)}</span>
+                  <span class="block whitespace-normal font-sans text-[12px] text-ink-2">{r.how}</span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <figcaption class="label mt-3 text-[12px]">{c.caption}</figcaption>
+</figure>

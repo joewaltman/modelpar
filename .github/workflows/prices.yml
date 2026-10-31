@@ -1,0 +1,122 @@
+name: Weekly price check
+
+# Re-verifies every list price on /sample against the providers' pricing pages.
+# Pass: bumps pricesCheckedOn in src/content/sample-data.ts and pushes, which
+# redeploys through the host's Git integration.
+# Fail or fetch error: opens (or comments on) a `price-check` issue, then fails.
+
+on:
+  schedule:
+    - cron: '0 15 * * 1' # Mondays 15:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: price-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # No npm cache: this job holds a write token, and npm ci is quick.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: npm ci
+
+      # Exit codes: 0 all pass, 1 a price or layout mismatch, 2 fetch errors only.
+      # Recorded rather than failing here, so the issue and summary steps still run.
+      - name: Check prices
+        id: prices
+        shell: bash
+        run: |
+          set +e
+          npm run check:prices -- --write-date --markdown price-report.md
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Add price report to job summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          if [ -f price-report.md ]; then cat price-report.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Commit the new check date
+        if: steps.prices.outputs.exit_code == '0'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- src/content/sample-data.ts; then
+            echo "pricesCheckedOn did not change, nothing to commit."
+            exit 0
+          fi
+          # The schedule event payload has no repository object, so ask the API.
+          default_branch=$(gh api "repos/$GITHUB_REPOSITORY" --jq .default_branch)
+          if [ "$GITHUB_REF_NAME" != "$default_branch" ]; then
+            echo "::notice::Ran on $GITHUB_REF_NAME, not $default_branch. Not pushing the date change."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/content/sample-data.ts
+          git commit -m 'Weekly price check: all prices match'
+          # In case something was pushed while the check ran.
+          git pull --rebase origin "$default_branch"
+          git push origin "HEAD:$default_branch"
+
+      - name: Open or update the price-check issue
+        if: steps.prices.outputs.exit_code != '0'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EXIT_CODE: ${{ steps.prices.outputs.exit_code }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ ! -s price-report.md ]; then
+            printf 'The price check exited with code %s before writing a report.\n\nRun: %s\n' "$EXIT_CODE" "$run_url" > price-report.md
+          fi
+          gh label create price-check --color D93F0B --description 'Weekly price check found a problem' 2>/dev/null || true
+          # Comment on the open issue instead of opening a duplicate each week.
+          existing=$(gh issue list --label price-check --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file price-report.md
+          else
+            gh issue create --title "Price check failed: $(date -u +%F)" --label price-check --body-file price-report.md
+          fi
+
+      # Informational: a broken link shows as a failed step but does not fail the job.
+      - name: Check links
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          npm run --silent check:links > link-report.txt 2>&1
+          code=$?
+          cat link-report.txt
+          {
+            echo '## Link check'
+            echo
+            echo '```'
+            cat link-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $code
+
+      - name: Fail if the price check did not pass
+        if: ${{ !cancelled() && steps.prices.outputs.exit_code != '0' }}
+        shell: bash
+        env:
+          EXIT_CODE: ${{ steps.prices.outputs.exit_code }}
+        run: |
+          echo "::error::Price check exited with code ${EXIT_CODE:-unknown}. See the price-check issue and the job summary."
+          exit 1

@@ -1,0 +1,25 @@
+---
+import { LOGO } from './logo-paths';
+import { site } from '../config';
+
+interface Props {
+  height?: number;
+  class?: string;
+}
+const { height = 22, class: className = '' } = Astro.props;
+const width = (LOGO.width / LOGO.height) * height;
+const b = LOGO.bars;
+---
+
+<svg
+  viewBox={`0 0 ${LOGO.width} ${LOGO.height}`}
+  width={width.toFixed(1)}
+  height={height}
+  role="img"
+  aria-label={site.brand}
+  class={className}
+>
+  <rect x={b.x} y={b.y1} width={b.w} height={b.h} rx={b.r} fill="currentColor"></rect>
+  <rect x={b.x} y={b.y2} width={b.w} height={b.h} rx={b.r} fill="var(--accent)"></rect>
+  <path d={LOGO.text} fill="currentColor"></path>
+</svg>

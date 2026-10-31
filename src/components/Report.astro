@@ -1,0 +1,616 @@
+---
+// The sample teardown as a printable document. `preview` renders only the top
+// (header, summary, spend) for the homepage excerpt, without headings in the outline.
+// Tables use the `stack` class: below 640px each row becomes label and value pairs.
+// They carry explicit ARIA roles because changing a table's display can drop its semantics.
+import Logo from './Logo.astro';
+import BarChart from './BarChart.astro';
+import Status from './Status.astro';
+import { sample } from '../content/copy';
+import { site } from '../config';
+import { rich } from '../lib/rich';
+import {
+  figures,
+  fill,
+  spendRows,
+  byProvider,
+  byModel,
+  total,
+  effective,
+  savings,
+  seatRows,
+  seatTotals,
+  routing,
+  hygiene,
+  prices,
+  tiers,
+  usd,
+  usd2,
+  perM,
+  perTask,
+  pct,
+  compact,
+} from '../lib/sample';
+
+interface Props {
+  preview?: boolean;
+}
+const { preview = false } = Astro.props;
+const vars = { ...figures, email: site.email, brand: site.brand };
+const f = (s: string) => fill(s, vars);
+const H1 = preview ? 'p' : 'h1';
+const H2 = preview ? 'p' : 'h2';
+const H3 = preview ? 'p' : 'h3';
+const money = (n: number) => usd(n);
+const signed = (n: number) => (n < 0 ? '−' + usd(-n) : n === 0 ? '$0' : '+' + usd(n));
+const pair = (a: number | null, b: number | null) => [a, b].map((x) => (x == null ? 'n/a' : perM(x))).join(' / ');
+// Split on spaces so model IDs wrap between words, never at their hyphens.
+const tokens = (s: string) => s.split(' ');
+const sources = [...new Map(Object.values(prices).map((p) => [p.page, p.provider])).entries()];
+
+const spendCols = sample.spend.columns;
+const effCols = sample.effective.columns;
+const savCols = sample.savings.columns;
+const seatCols = sample.seats.columns;
+const routeCols = sample.routing.columns;
+const hygCols = sample.hygiene.columns;
+const modelCols = sample.models.columns;
+---
+
+<article class:list={['report', preview && 'report-preview']} aria-label={preview ? undefined : 'Sample teardown for Example Co.'}>
+  <!-- Header -->
+  <div class="flex items-center justify-between gap-4 border-b border-rule pb-4">
+    <div class="flex items-center gap-3 text-ink">
+      <Logo height={15} />
+      <span class="label hidden text-[12px] sm:inline">{sample.header.kicker}</span>
+    </div>
+    <span class="label text-[12px]">{f(sample.confidential)}</span>
+  </div>
+
+  <div class="pt-8">
+    <H1 class="text-[32px] font-semibold leading-tight tracking-[-0.02em] md:text-[40px]">{figures.company}</H1>
+    <p class="mt-1 text-ink-2">{f(sample.header.sub)}</p>
+    <dl class="report-meta mt-6 grid gap-x-6 gap-y-1.5 text-[14px]">
+      {
+        sample.header.rows.map(([k, v]) => (
+          <>
+            <dt class="label text-[12px] leading-[1.6]">{k}</dt>
+            <dd class="m-0 text-ink">{f(v)}</dd>
+          </>
+        ))
+      }
+    </dl>
+  </div>
+
+  <!-- Summary -->
+  <section class="report-section">
+    <H2 class="report-h2">{sample.summary.heading}</H2>
+    <div class="rounded-md border border-rule">
+      <table class="data summary-table" role="table">
+        <tbody role="rowgroup">
+          {
+            sample.summary.rows.map(([k, v, note], i) => (
+              <tr role="row">
+                <th scope="row" role="rowheader">
+                  {k}
+                </th>
+                <td role="cell">
+                  <span class:list={['num text-[15px]', i < 2 ? 'font-semibold' : '', i === 1 ? 'text-accent' : '']}>{f(v)}</span>
+                  {note && <span class="ml-2 text-[13px] text-ink-2">{f(note)}</span>}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="report-prose mt-4 text-[15px]">{f(sample.summary.note)}</p>
+  </section>
+
+  <!-- 1. Spend -->
+  <section class="report-section">
+    <H2 class="report-h2">{sample.spend.heading}</H2>
+    <BarChart title={sample.spend.chartTitle} rows={byModel} />
+    <div class="table-wrap mt-8">
+      <table class="data stack" role="table">
+        <thead role="rowgroup">
+          <tr role="row">
+            {spendCols.map((c, i) => <th scope="col" role="columnheader" class={i >= 3 ? 'r' : ''}>{c}</th>)}
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {
+            spendRows.map((r) => (
+              <tr role="row">
+                <td role="cell" data-title>
+                  {r.workload}
+                </td>
+                <td role="cell" data-label={spendCols[1]}>
+                  {r.provider}
+                </td>
+                <td role="cell" class="m" data-label={spendCols[2]}>
+                  {r.model}
+                </td>
+                <td role="cell" class="r" data-label={spendCols[3]}>
+                  {money(r.cost)}
+                </td>
+                <td role="cell" class="r text-ink-2" data-label={spendCols[4]}>
+                  {pct(r.share)}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+        <tfoot role="rowgroup">
+          <tr role="row">
+            <td role="cell" colspan="3" data-title>
+              {sample.spend.totalLabel}
+            </td>
+            <td role="cell" class="r" data-label={spendCols[3]}>
+              {money(total)}
+            </td>
+            <td role="cell" class="r" data-label={spendCols[4]}>
+              100%
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="report-prose mt-4 text-[14px] text-ink-2">
+      <span class="font-medium text-ink">{sample.spend.byProviderLabel}:</span>
+      {byProvider.map((p) => `${p.name} ${money(p.cost)} (${pct(p.share)})`).join(' · ')}.
+    </p>
+  </section>
+
+  {
+    !preview && (
+      <>
+        {/* 2. Effective vs list */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.effective.heading}</H2>
+          <p class="report-prose mb-5 text-[15px] text-ink-2">{sample.effective.lead}</p>
+          <div class="table-wrap">
+            <table class="data stack" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {effCols.map((c, i) => (
+                    <th scope="col" role="columnheader" class={i === 2 || i === 3 ? 'r' : ''}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {effective.map((e) => (
+                  <tr role="row">
+                    <td role="cell" class="m" data-title>
+                      {e.model}
+                    </td>
+                    <td role="cell" data-label={effCols[1]}>
+                      {e.where}
+                    </td>
+                    <td role="cell" class="r text-ink-2" data-label={effCols[2]}>
+                      {pair(e.list[0], e.list[1])}
+                    </td>
+                    <td role="cell" class="r" data-label={effCols[3]}>
+                      {pair(e.eff[0], e.eff[1])}
+                    </td>
+                    <td role="cell" class:list={['sm:min-w-[220px]', e.flag && 'font-medium']} data-label={effCols[4]} data-wide>
+                      {e.why}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="report-note">{f(sample.effective.note)}</p>
+        </section>
+
+        {/* 3. Savings */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.savings.heading}</H2>
+          <div class="table-wrap">
+            <table class="data stack" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {savCols.map((c, i) => (
+                    <th scope="col" role="columnheader" class={i >= 2 && i <= 4 ? 'r' : ''}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {savings.map((s) => (
+                  <tr role="row">
+                    <td role="cell" class="m hide-stacked">
+                      {s.n}
+                    </td>
+                    <td role="cell" class="sm:min-w-[220px]" data-title>
+                      <span class="sm:hidden">{s.n}. </span>
+                      {s.title}
+                    </td>
+                    <td role="cell" class="r text-ink-2" data-label={savCols[2]}>
+                      {money(s.now)}
+                    </td>
+                    <td role="cell" class="r" data-label={savCols[3]}>
+                      {money(s.after)}
+                    </td>
+                    <td role="cell" class="r font-semibold text-accent" data-label={savCols[4]}>
+                      {money(s.save)}
+                    </td>
+                    <td role="cell" class="whitespace-nowrap" data-label={savCols[5]}>
+                      {s.modelChange ? sample.savings.yes : sample.savings.no}
+                    </td>
+                    <td role="cell" class="whitespace-nowrap" data-label={savCols[6]}>
+                      {s.effort}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ol class="report-list report-prose mt-6">
+            {sample.savings.details.map((d) => {
+              const [head, ...rest] = f(d).split('. ');
+              return (
+                <li>
+                  <span class="font-medium">{head}.</span> {rest.join('. ')}
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        {/* 4. Seats */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.seats.heading}</H2>
+          <p class="report-prose mb-5 text-[15px] text-ink-2">{sample.seats.lead}</p>
+          <div class="table-wrap">
+            <table class="data stack" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {seatCols.map((c, i) => (
+                    <th scope="col" role="columnheader" class={[1, 2, 4, 5].includes(i) ? 'r' : ''}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {seatRows.map((r) => (
+                  <tr role="row">
+                    <td role="cell" class="m" data-title>
+                      <span class="font-sans sm:hidden">{seatCols[0]} </span>
+                      {r.name}
+                    </td>
+                    <td role="cell" class="r" data-label={seatCols[1]}>
+                      {money(r.api)}
+                    </td>
+                    <td role="cell" class="r text-ink-2" data-label={seatCols[2]}>
+                      {r.activeDays}
+                    </td>
+                    <td role="cell" class="whitespace-nowrap" data-label={seatCols[3]}>
+                      {r.option}
+                    </td>
+                    <td role="cell" class="r" data-label={seatCols[4]}>
+                      {money(r.optionCost)}
+                    </td>
+                    <td role="cell" class:list={['r', r.diff < 0 && 'font-semibold text-accent']} data-label={seatCols[5]}>
+                      {signed(r.diff)}
+                    </td>
+                    <td role="cell" class="sm:min-w-[200px]" data-label={seatCols[6]} data-wide>
+                      {r.fit}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot role="rowgroup">
+                <tr role="row">
+                  <td role="cell" data-title>
+                    {sample.seats.totalLabel}
+                  </td>
+                  <td role="cell" class="r" data-label={seatCols[1]}>
+                    {money(seatTotals.api)}
+                  </td>
+                  <td role="cell" />
+                  <td role="cell" />
+                  <td role="cell" class="r" data-label={seatCols[4]}>
+                    {money(seatTotals.option)}
+                  </td>
+                  <td role="cell" class="r text-accent" data-label={seatCols[5]}>
+                    {signed(seatTotals.option - seatTotals.api)}
+                  </td>
+                  <td role="cell" />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p class="report-note">{f(sample.seats.note)}</p>
+          <H3 class="mt-6 text-[15px] font-semibold">{sample.seats.cursorHeading}</H3>
+          <p class="report-prose mt-1 text-[15px]">{f(sample.seats.cursor)}</p>
+        </section>
+
+        {/* 5. Routing card */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.routing.heading}</H2>
+          <div class="table-wrap">
+            <table class="data stack routing" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {routeCols.map((c, i) => (
+                    <th scope="col" role="columnheader" class={i === 3 ? 'r' : ''}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {routing.map((r) => (
+                  <tr role="row">
+                    <td role="cell" class="sm:min-w-[150px]" data-title>
+                      <span class="font-medium">{r.task}</span>
+                      {r.volume != null && (
+                        <span class="num block text-[12px] font-normal text-ink-2">
+                          {compact(r.volume)} {sample.routing.volume}
+                        </span>
+                      )}
+                    </td>
+                    <td role="cell" class="font-mono text-[13px] text-ink-2" data-label={routeCols[1]}>
+                      {tokens(r.now).map((w, i) => (
+                        <>
+                          {i > 0 && ' '}
+                          <span class="whitespace-nowrap">{w}</span>
+                        </>
+                      ))}
+                    </td>
+                    <td role="cell" class="font-mono text-[13px]" data-label={routeCols[2]}>
+                      {tokens(r.effort === 'default' ? r.model : `${r.model}, ${r.effort}`).map((w, i) => (
+                        <>
+                          {i > 0 && ' '}
+                          <span class="whitespace-nowrap">{w}</span>
+                        </>
+                      ))}
+                    </td>
+                    <td role="cell" class="r" data-label={routeCols[3]}>
+                      {r.costNow == null ? (
+                        <span class="font-sans">{sample.routing.seat}</span>
+                      ) : r.costNext == null ? (
+                        <>
+                          {perTask(r.costNow)} <span class="block font-sans text-ink-2 sm:inline">({sample.routing.noChange})</span>
+                        </>
+                      ) : (
+                        <>
+                          {perTask(r.costNow)} <span class="text-ink-2">to</span> <span class="font-semibold text-accent">{perTask(r.costNext)}</span>
+                        </>
+                      )}
+                    </td>
+                    <td role="cell" class="sm:min-w-[140px]" data-label={routeCols[4]}>
+                      {r.basis}
+                      {r.headroom && <span class="block text-[13px] text-ink-2">{r.headroom}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="report-note">{sample.routing.note}</p>
+        </section>
+
+        {/* 6. Hygiene */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.hygiene.heading}</H2>
+          <div class="table-wrap">
+            <table class="data stack" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {hygCols.map((c) => (
+                    <th scope="col" role="columnheader">
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {hygiene.map((h) => (
+                  <tr role="row">
+                    <td role="cell" class="font-medium sm:min-w-[180px]" data-title>
+                      {h.check}
+                    </td>
+                    <td role="cell" class="whitespace-nowrap" data-label={hygCols[1]}>
+                      <Status result={h.result} />
+                    </td>
+                    <td role="cell" class="sm:min-w-[260px]" data-label={hygCols[2]} data-wide set:html={rich(h.detail)} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* 7. Models worth testing */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.models.heading}</H2>
+          <div class="table-wrap">
+            <table class="data stack" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  {modelCols.map((c, i) => (
+                    <th scope="col" role="columnheader" class={i === 1 ? 'r' : ''}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                {sample.models.rows.map((m) => {
+                  const p = prices[m.price as keyof typeof prices];
+                  return (
+                    <tr role="row">
+                      <td role="cell" data-title>
+                        <span class="block font-mono text-[13px]">
+                          {tokens(m.label ?? p.id).map((w, i) => (
+                            <>
+                              {i > 0 && ' '}
+                              <span class="whitespace-nowrap">{w}</span>
+                            </>
+                          ))}
+                        </span>
+                        <span class="block text-[13px] font-normal text-ink-2">{p.provider}</span>
+                      </td>
+                      <td role="cell" class="r" data-label={modelCols[1]}>
+                        {usd2(p.in)} / {usd2(p.out)}
+                        {m.batch && (
+                          <span class="block text-ink-2">
+                            {usd2(p.in * tiers.batchFactor)} / {usd2(p.out * tiers.batchFactor)} Batch
+                          </span>
+                        )}
+                      </td>
+                      <td role="cell" class="sm:min-w-[110px]" data-label={modelCols[2]}>
+                        {m.for}
+                      </td>
+                      <td role="cell" class="sm:min-w-[200px]" data-label={modelCols[3]} data-wide>
+                        {f(m.why)}
+                      </td>
+                      <td role="cell" class="text-ink-2 sm:min-w-[160px]" data-label={modelCols[4]} data-wide>
+                        {m.check}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* 8. Next steps */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.next.heading}</H2>
+          <ol class="report-list report-prose">
+            {sample.next.items.map((i) => (
+              <li set:html={rich(f(i))} />
+            ))}
+          </ol>
+        </section>
+
+        {/* Methodology */}
+        <section class="report-section">
+          <H2 class="report-h2">{sample.methodology.heading}</H2>
+          <p class="report-prose text-[14px] text-ink-2">{f(sample.methodology.body)}</p>
+          <p class="report-prose mt-3 text-[13px] text-ink-2">
+            <span class="font-medium text-ink">{sample.methodology.sources}:</span>{' '}
+            {sources.map(([url, provider], i) => (
+              <>
+                <a class="link" href={url} rel="noopener">
+                  {provider}
+                </a>
+                {i < sources.length - 1 ? ' · ' : ''}
+              </>
+            ))}
+            {' · '}
+            <a class="link" href="https://cursor.com/docs/account/teams/pricing" rel="noopener">
+              Cursor
+            </a>
+          </p>
+        </section>
+
+        <p class="label mt-10 border-t border-rule pt-4 text-center text-[12px]">{f(sample.footer)}</p>
+      </>
+    )
+  }
+</article>
+
+<style>
+  .report {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  @media (min-width: 768px) {
+    .report {
+      padding: 48px;
+    }
+  }
+  .report-meta {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .report-meta {
+      grid-template-columns: 120px 1fr;
+    }
+  }
+  .report-meta dd {
+    margin-bottom: 6px;
+  }
+  @media (min-width: 640px) {
+    .report-meta dd {
+      margin-bottom: 0;
+    }
+  }
+  .report-section {
+    margin-top: 44px;
+  }
+  .report :global(.report-prose),
+  .report :global(.report-note) {
+    max-width: 46rem;
+  }
+  .report :global(.report-h2) {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .report :global(.report-note) {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--ink-2);
+    border-left: 2px solid var(--rule-strong);
+    padding-left: 12px;
+  }
+  .report :global(.report-list) {
+    list-style: decimal;
+    padding-left: 20px;
+    font-size: 15px;
+  }
+  .report :global(.report-list li) {
+    padding-left: 4px;
+    margin-bottom: 10px;
+  }
+  .summary-table th,
+  .summary-table td {
+    padding: 10px 14px;
+  }
+  .summary-table th {
+    width: 40%;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+  .summary-table tr:last-child th,
+  .summary-table tr:last-child td {
+    border-bottom: 0;
+  }
+  @media (max-width: 639.98px) {
+    .summary-table tr {
+      display: block;
+      border-bottom: 1px solid var(--rule);
+    }
+    .summary-table tr:last-child {
+      border-bottom: 0;
+    }
+    .summary-table th,
+    .summary-table td {
+      display: block;
+      width: auto;
+      border: 0;
+    }
+    .summary-table th {
+      padding-bottom: 0;
+    }
+    .summary-table td {
+      padding-top: 2px;
+    }
+  }
+</style>

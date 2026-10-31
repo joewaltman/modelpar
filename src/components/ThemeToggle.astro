@@ -1,0 +1,51 @@
+---
+import Sun from '@lucide/astro/icons/sun';
+import Moon from '@lucide/astro/icons/moon';
+import { nav } from '../content/copy';
+---
+
+<button
+  type="button"
+  class="theme-toggle inline-flex h-9 w-9 items-center justify-center rounded-md border border-rule text-ink-2 hover:border-rule-strong hover:text-ink"
+  aria-label={nav.themeToggle}
+  title={nav.themeToggle}
+  data-theme-toggle
+>
+  <Sun size={16} class="icon-sun" aria-hidden="true" />
+  <Moon size={16} class="icon-moon" aria-hidden="true" />
+</button>
+
+<style>
+  .theme-toggle .icon-moon {
+    display: none;
+  }
+  :global([data-resolved-theme='dark']) .theme-toggle .icon-sun {
+    display: none;
+  }
+  :global([data-resolved-theme='dark']) .theme-toggle .icon-moon {
+    display: block;
+  }
+</style>
+
+<script>
+  // Toggle between light and dark, remembering the choice. Default follows the system.
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const resolve = () => root.dataset.theme || (media.matches ? 'dark' : 'light');
+  const sync = () => {
+    root.dataset.resolvedTheme = resolve();
+    document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.setAttribute('aria-pressed', String(resolve() === 'dark')));
+  };
+  media.addEventListener('change', sync);
+  document.querySelectorAll('[data-theme-toggle]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const next = resolve() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {}
+      sync();
+    }),
+  );
+  sync();
+</script>

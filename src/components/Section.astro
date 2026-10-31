@@ -1,0 +1,33 @@
+---
+interface Props {
+  id?: string;
+  label?: string;
+  heading?: string;
+  lead?: string;
+  class?: string;
+  border?: boolean;
+}
+const { id, label, heading, lead, class: className = '', border = true } = Astro.props;
+const headingId = id ? `${id}-heading` : undefined;
+---
+
+<section id={id} aria-labelledby={heading ? headingId : undefined} class:list={[border && 'border-t border-rule', className]}>
+  <div class="wrap py-20 md:py-28">
+    {
+      (label || heading) && (
+        <div class="mb-12 grid gap-4 md:mb-16 md:grid-cols-12 md:gap-10">
+          <div class="md:col-span-3">{label && <p class="label pt-1.5">{label}</p>}</div>
+          <div class="md:col-span-9">
+            {heading && (
+              <h2 id={headingId} class="max-w-[22ch] text-[30px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[40px]">
+                {heading}
+              </h2>
+            )}
+            {lead && <p class="mt-4 max-w-[60ch] text-ink-2">{lead}</p>}
+          </div>
+        </div>
+      )
+    }
+    <slot />
+  </div>
+</section>

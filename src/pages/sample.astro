@@ -1,0 +1,146 @@
+---
+import Base from '../layouts/Base.astro';
+import Report from '../components/Report.astro';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
+import Printer from '@lucide/astro/icons/printer';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+import { meta, sample } from '../content/copy';
+import { fill, figures } from '../lib/sample';
+---
+
+<Base title={meta.sample.title} description={meta.sample.description} path="/sample">
+  <div class="sample-page">
+    <div class="sample-banner border-b border-warn/30 bg-warn-bg">
+      <div class="wrap flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <p class="flex items-start gap-2.5 text-[15px]">
+          <TriangleAlert size={18} class="mt-0.5 flex-none text-warn" aria-hidden="true" />
+          <span>
+            <strong class="font-semibold">{sample.banner.title}</strong>
+            <span class="text-ink-2"> {fill(sample.banner.body, figures)}</span>
+          </span>
+        </p>
+        <div class="flex flex-none flex-wrap gap-2 print:hidden">
+          <a href="/#get-started" class="btn btn-primary btn-sm">
+            {sample.actions.cta}
+            <ArrowRight size={14} aria-hidden="true" />
+          </a>
+          <button type="button" class="btn btn-secondary btn-sm" data-print>
+            <Printer size={14} aria-hidden="true" />
+            {sample.actions.print}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap py-10 md:py-16">
+      <Report />
+    </div>
+  </div>
+</Base>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>
+
+<style is:global>
+  @media print {
+    @page {
+      size: auto;
+      margin: 14mm 12mm;
+    }
+    :root,
+    :root[data-theme='dark'] {
+      color-scheme: light !important;
+      --bg: #ffffff !important;
+      --surface: #ffffff !important;
+      --surface-2: #f3f2ee !important;
+      --ink: #111110 !important;
+      --ink-2: #4f4f4a !important;
+      --rule: #dcdbd5 !important;
+      --rule-strong: #bdbcb6 !important;
+      --accent: #0e6a45 !important;
+      --ok: #17723f !important;
+      --ok-bg: #eaf5ee !important;
+      --warn: #7a4e00 !important;
+      --warn-bg: #fbf3e2 !important;
+      --bad: #b42318 !important;
+      --bad-bg: #fcedeb !important;
+      --chart: #2c2c29 !important;
+    }
+    html,
+    body {
+      background: #fff !important;
+      font-size: 10pt;
+    }
+    .sample-page > div:last-child {
+      max-width: none !important;
+      padding: 0 !important;
+    }
+    .sample-banner {
+      border: 1px solid var(--rule) !important;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .sample-banner .wrap {
+      padding: 6px 10px !important;
+      max-width: none;
+    }
+    .report {
+      border: 0 !important;
+      padding: 0 !important;
+    }
+    .report .table-wrap {
+      overflow: visible !important;
+    }
+    .report .data {
+      font-size: 8pt !important;
+    }
+    .report .data td.r,
+    .report .data td.m {
+      font-size: 7.5pt !important;
+    }
+    .report .data th {
+      font-size: 7pt !important;
+    }
+    /* One size for every table cell, including mono and sub-line spans set in px on screen. */
+    .report .data td,
+    .report .data td * {
+      font-size: 8pt !important;
+    }
+    .report .data td .status,
+    .report .data td .status * {
+      font-size: 7.5pt !important;
+    }
+    .report .summary-table th {
+      font-size: 9pt !important;
+    }
+    .report .summary-table td,
+    .report .summary-table td * {
+      font-size: 10pt !important;
+    }
+    .report [class*='min-w-'] {
+      min-width: 0 !important;
+    }
+    .report-section {
+      margin-top: 18px !important;
+      break-inside: auto;
+    }
+    .report h2,
+    .report h3 {
+      break-after: avoid;
+    }
+    .report tr {
+      break-inside: avoid;
+    }
+    .status {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    a.link {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+</style>

@@ -1,0 +1,326 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import HeroCard from '../components/HeroCard.astro';
+import Report from '../components/Report.astro';
+import TeardownForm from '../components/TeardownForm.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
+import FileSpreadsheet from '@lucide/astro/icons/file-spreadsheet';
+import EyeOff from '@lucide/astro/icons/eye-off';
+import Laptop from '@lucide/astro/icons/laptop';
+import Trash from '@lucide/astro/icons/trash';
+import Users from '@lucide/astro/icons/users';
+import Signature from '@lucide/astro/icons/signature';
+import { site, isPlaceholder } from '../config';
+import { meta, hero, problem, steps, samplePreview, data, founder, pricing, faq, getStarted } from '../content/copy';
+
+const icons = { file: FileSpreadsheet, 'eye-off': EyeOff, laptop: Laptop, trash: Trash, users: Users, signature: Signature } as const;
+const initials = site.founder.name
+  .split(' ')
+  .map((w) => w[0])
+  .join('');
+const hasCal = !isPlaceholder(site.calLink);
+---
+
+<Base title={meta.home.title} description={meta.home.description} path="/">
+  <!-- 1. Hero -->
+  <section aria-labelledby="hero-heading">
+    <div class="wrap grid items-center gap-12 pb-20 pt-14 md:grid-cols-12 md:gap-10 md:pb-28 md:pt-24">
+      <div class="md:col-span-7">
+        <p class="label mb-5">{hero.audience}</p>
+        <h1 id="hero-heading" class="max-w-[16ch] text-[42px] font-semibold leading-[1.04] tracking-[-0.035em] sm:text-[52px] lg:text-[60px]">
+          {hero.headline}
+        </h1>
+        <p class="mt-6 max-w-[54ch] text-[18px] leading-[1.55] text-ink-2 md:text-[19px]">{hero.subhead}</p>
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a href={hero.primary.href} class="btn btn-primary">
+            {hero.primary.label}
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+          <a href={hero.secondary.href} class="btn btn-secondary">{hero.secondary.label}</a>
+        </div>
+        <p class="mt-5 text-[14px] text-ink-2">{hero.quiet}</p>
+      </div>
+      <div class="md:col-span-5">
+        <HeroCard />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Problem -->
+  <Section id="problem" label={problem.label} heading={problem.heading} lead={problem.lead}>
+    <div class="grid gap-px overflow-hidden rounded-lg border border-rule bg-rule md:grid-cols-3">
+      {
+        problem.cards.map((c, i) => (
+          <div class="bg-surface p-6 md:p-7">
+            <p class="label mb-6">{String.fromCharCode(97 + i)}.</p>
+            <h3 class="text-[18px] font-semibold leading-snug tracking-[-0.01em]">{c.title}</h3>
+            <p class="mt-3 text-[16px] text-ink-2">{c.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <!-- 3. How it works -->
+  <Section id="how-it-works" label={steps.label} heading={steps.heading} lead={steps.lead}>
+    <ol class="m-0 list-none border-t border-rule p-0">
+      {
+        steps.items.map((s) => (
+          <li class="grid gap-6 border-b border-rule py-10 md:grid-cols-12 md:gap-10">
+            <div class="md:col-span-3">
+              <p class="num text-[14px] text-ink-2">{s.n}</p>
+              <h3 class="mt-2 text-[22px] font-semibold leading-snug tracking-[-0.015em]">{s.title}</h3>
+              <p class="mt-2 text-ink-2">{s.summary}</p>
+            </div>
+            <dl class="step-fields m-0 grid gap-x-8 gap-y-5 text-[16px] md:col-span-9">
+              <div class="sm:col-span-2">
+                <dt class="label mb-1">{steps.fields.give}</dt>
+                <dd class="m-0">{s.give}</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="label mb-1">{steps.fields.get}</dt>
+                <dd class="m-0">
+                  <ul class="m-0 list-none space-y-1.5 p-0">
+                    {s.get.map((g) => (
+                      <li class="relative pl-4 before:absolute before:left-0 before:top-[0.72em] before:h-px before:w-2 before:bg-ink-2">
+                        {g}
+                      </li>
+                    ))}
+                  </ul>
+                  {s.note && <p class="mt-3 text-[15px] text-ink-2">{s.note}</p>}
+                </dd>
+              </div>
+              {s.details?.map((d) => (
+                <div class="sm:col-span-2">
+                  <dt class="label mb-1">{d.term}</dt>
+                  <dd class="m-0">{d.text}</dd>
+                </div>
+              ))}
+              <div>
+                <dt class="label mb-1">{steps.fields.time}</dt>
+                <dd class="m-0">{s.time}</dd>
+              </div>
+              <div>
+                <dt class="label mb-1">{steps.fields.cost}</dt>
+                <dd class:list={['m-0 font-medium', s.costIsKey && 'text-accent']}>{s.cost}</dd>
+              </div>
+            </dl>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <!-- 4. Sample report preview -->
+  <Section id="sample" label={samplePreview.label} heading={samplePreview.heading} lead={samplePreview.body}>
+    <a href="/sample" class="group block rounded-lg focus-visible:outline-offset-4" aria-label={samplePreview.link}>
+      <div class="preview-crop" aria-hidden="true" inert>
+        <Report preview />
+      </div>
+    </a>
+    <p class="mt-6">
+      <a href="/sample" class="link inline-flex items-center gap-1.5 text-[16px] font-medium">
+        {samplePreview.link}
+        <ArrowRight size={16} aria-hidden="true" />
+      </a>
+    </p>
+  </Section>
+
+  <!-- 5. Your data -->
+  <Section id="data" label={data.label} heading={data.heading}>
+    <div class="grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        data.items.map((d) => {
+          const Icon = icons[d.icon as keyof typeof icons];
+          return (
+            <div class="border-t border-rule pt-5">
+              <Icon size={18} class="text-ink-2" aria-hidden="true" />
+              <h3 class="mt-4 text-[17px] font-semibold leading-snug">{d.title}</h3>
+              <p class="mt-2 text-[16px] text-ink-2">{d.body}</p>
+            </div>
+          );
+        })
+      }
+    </div>
+    <p class="mt-12 max-w-[70ch] text-[15px] text-ink-2">{data.note}</p>
+  </Section>
+
+  <!-- 6. Who's behind it -->
+  <Section id="founder" label={founder.label}>
+    <div class="grid gap-8 md:grid-cols-12 md:gap-10">
+      <div class="md:col-span-3" aria-hidden="true">
+        {
+          site.founder.photo ? (
+            <img src={site.founder.photo} alt={founder.photoAlt} width="160" height="160" class="h-24 w-24 rounded-lg border border-rule object-cover md:h-40 md:w-40" />
+          ) : (
+            <div class="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-rule-strong bg-surface-2 md:h-40 md:w-40">
+              <span class="num text-[22px] text-ink-2 md:text-[28px]">{initials}</span>
+              <span class="label text-[11px]">{founder.photoPlaceholder}</span>
+            </div>
+          )
+        }
+      </div>
+      <div class="md:col-span-9">
+        <h2 id="founder-heading" class="text-[26px] font-semibold tracking-[-0.02em]">{site.founder.name}</h2>
+        <p class="label mt-1">{site.founder.role}</p>
+        {founder.bio.map((p) => <p class="mt-5 max-w-[62ch] text-[17px]">{p}</p>)}
+        <p class="mt-4 max-w-[62ch] text-[17px] text-ink-2">{founder.early}</p>
+        <p class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[15px]">
+          <a class="link inline-flex items-center gap-1" href={site.founder.linkedin} rel="noopener">
+            {founder.linkedin}
+            <ArrowUpRight size={14} aria-hidden="true" />
+          </a>
+          <a class="link" href={`mailto:${site.email}`}>{site.email}</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- 7. Pricing -->
+  <Section id="pricing" label={pricing.label} heading={pricing.heading}>
+    <div class="table-wrap rounded-lg border border-rule bg-surface">
+      <table class="data stack pricing-table" role="table">
+        <thead role="rowgroup">
+          <tr role="row">
+            {
+              pricing.columns.map((c) => (
+                <th scope="col" role="columnheader">
+                  {c}
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {
+            pricing.rows.map((r) => (
+              <tr role="row">
+                <th scope="row" role="rowheader" data-title>
+                  {r.service}
+                </th>
+                <td role="cell" class:list={['num text-[15px]', r.key ? 'font-semibold text-accent' : 'text-ink']}>
+                  {r.price}
+                </td>
+                <td role="cell" class="text-[15px] text-ink-2">
+                  {r.notes}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-5 text-[15px] text-ink-2">{pricing.footnote}</p>
+  </Section>
+
+  <!-- 8. FAQ -->
+  <Section id="faq" label={faq.label} heading={faq.heading}>
+    <dl class="m-0 border-t border-rule">
+      {
+        faq.items.map((item) => (
+          <div class="grid gap-2 border-b border-rule py-6 md:grid-cols-12 md:gap-10">
+            <dt class="text-[17px] font-semibold leading-snug md:col-span-3">{item.q}</dt>
+            <dd class="m-0 max-w-[64ch] text-ink-2 md:col-span-9">{item.a}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Section>
+
+  <!-- 9. Get started -->
+  <Section id="get-started">
+    <div class="grid gap-10 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <p class="label mb-4">{getStarted.label}</p>
+        <h2 id="get-started-heading" class="text-[32px] font-semibold leading-[1.1] tracking-[-0.02em] md:text-[40px]">{getStarted.heading}</h2>
+        <p class="mt-4 text-ink-2">{getStarted.body}</p>
+        <div class="mt-8 border-t border-rule pt-6 text-[15px]">
+          <p class="text-ink-2">{getStarted.call.lead}</p>
+          <p class="mt-1">
+            {
+              hasCal ? (
+                <a class="link inline-flex items-center gap-1 font-medium" href={site.calLink} rel="noopener">
+                  {getStarted.call.label}
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </a>
+              ) : (
+                <span class="font-medium">
+                  {getStarted.call.label} <span class="num text-ink-2">{site.calLink}</span>
+                </span>
+              )
+            }
+          </p>
+          <p class="mt-4 text-ink-2">
+            {getStarted.emailLead}{' '}
+            <a class="link" href={`mailto:${site.email}`}>
+              {site.email}
+            </a>
+          </p>
+        </div>
+      </div>
+      <div class="md:col-span-7">
+        <TeardownForm />
+      </div>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  @media (min-width: 640px) {
+    .step-fields {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .preview-crop {
+    position: relative;
+    max-height: 560px;
+    overflow: hidden;
+    border-radius: 8px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+    transition: transform 160ms ease;
+  }
+  a:hover .preview-crop :global(.report) {
+    border-color: var(--rule-strong);
+  }
+  @media (min-width: 768px) {
+    .preview-crop {
+      max-height: 640px;
+    }
+  }
+  .pricing-table th,
+  .pricing-table td {
+    padding: 16px 20px;
+  }
+  .pricing-table th[scope='row'] {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  @media (max-width: 639.98px) {
+    .pricing-table tr {
+      padding: 14px 18px;
+    }
+    .pricing-table tr:last-child {
+      border-bottom: 0;
+    }
+    .pricing-table tbody tr:first-child {
+      border-top: 0;
+    }
+    .pricing-table th[scope='row'],
+    .pricing-table td {
+      padding: 2px 0;
+    }
+  }
+  .pricing-table thead th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .pricing-table tbody tr:last-child th,
+  .pricing-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+</style>

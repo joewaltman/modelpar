@@ -1,0 +1,24 @@
+---
+import Check from '@lucide/astro/icons/check';
+import X from '@lucide/astro/icons/x';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
+import { sample } from '../content/copy';
+
+interface Props {
+  result: 'pass' | 'fail' | 'warn';
+}
+const { result } = Astro.props;
+const label = sample.hygiene.labels[result];
+const cls = {
+  pass: 'text-ok bg-ok-bg',
+  fail: 'text-bad bg-bad-bg',
+  warn: 'text-warn bg-warn-bg',
+}[result];
+---
+
+<span class:list={['status inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[12px] font-medium', cls]}>
+  {result === 'pass' && <Check size={12} stroke-width={2.5} aria-hidden="true" />}
+  {result === 'fail' && <X size={12} stroke-width={2.5} aria-hidden="true" />}
+  {result === 'warn' && <TriangleAlert size={12} stroke-width={2.5} aria-hidden="true" />}
+  {label}
+</span>
