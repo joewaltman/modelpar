@@ -26,7 +26,6 @@ export const nav = {
   links: [
     { label: 'How it works', href: '/#how-it-works' },
     { label: 'Sample report', href: '/sample' },
-    { label: 'Pricing', href: '/#pricing' },
     { label: 'FAQ', href: '/#faq' },
   ],
   cta: { label: 'Get a free teardown', href: '/#get-started' },
@@ -78,13 +77,13 @@ export const problem = {
 
 export const steps = {
   label: 'How it works',
-  heading: 'Four steps. The first one is free.',
-  lead: 'Each step stands on its own. Stop whenever the numbers stop being worth it.',
-  fields: { give: 'You give', get: 'You get', time: 'Time', cost: 'Cost' },
+  heading: 'Four steps. Start with a teardown.',
+  lead: 'Each step stands on its own, so you can stop after any of them.',
+  fields: { give: 'You give', get: 'You get', time: 'Time' },
   items: [
     {
       n: '01',
-      title: 'Free AI bill teardown',
+      title: 'AI bill teardown',
       summary: 'A one-page report on what you pay, what you could pay, and where it goes.',
       give: 'Usage and cost exports from each provider console. Seat counts and plans for coding agents. Your order form, if you have a commit.',
       get: [
@@ -96,8 +95,6 @@ export const steps = {
         'A routing card: task type, recommended model and effort level, cost per task, plan-limit headroom',
       ],
       time: '48 hours after we receive your exports',
-      cost: 'Free',
-      costIsKey: true,
     },
     {
       n: '02',
@@ -110,8 +107,6 @@ export const steps = {
       ],
       note: "Comps is new. Where a band doesn't have 3 companies yet, we say so instead of estimating.",
       time: 'Shared with your teardown',
-      cost: 'Free for teams that contribute their terms',
-      costIsKey: true,
     },
     {
       n: '03',
@@ -134,8 +129,6 @@ export const steps = {
         },
       ],
       time: '2 to 3 weeks for the first map, then nightly',
-      cost: 'Pricing on request',
-      costIsKey: false,
     },
     {
       n: '04',
@@ -148,8 +141,6 @@ export const steps = {
         'You make the final call on every term',
       ],
       time: 'Start 60 to 90 days before renewal',
-      cost: '[20 to 30]% of first-year savings. No savings, no fee.',
-      costIsKey: false,
     },
   ],
 };
@@ -188,24 +179,12 @@ export const founder = {
   photoAlt: 'Joe Waltman',
   photoPlaceholder: 'Photo',
   bio: [
-    'Joe was a YC W15 founder (VetPronto). Previously [roles]. [Earlier company acquired by Twitter, confirm wording].',
+    "Joe co-founded VetPronto, a mobile veterinary care company, in Y Combinator's W15 batch. Before that he co-founded RestEngine, which was acquired by Twitter. Most recently he was a Group Product Manager at Coinbase, from 2018 to 2022.",
+    'He started his career as a network engineer at Qualcomm, and holds an MS in Computer Science from USC and an MBA from INSEAD.',
   ],
   early: "We're early and working with our first 10 teams.",
   linkedin: 'LinkedIn',
   email: 'Email',
-};
-
-export const pricing = {
-  label: 'Pricing',
-  heading: 'Start free. Pay only for ongoing work.',
-  columns: ['Service', 'Price', 'Notes'],
-  rows: [
-    { service: 'Teardown', price: 'Free', key: true, notes: 'One-page report in 48 hours' },
-    { service: 'Comps', price: 'Free for contributors', key: true, notes: 'Share your terms to see the full benchmark' },
-    { service: 'Model and effort map, plus nightly canary', price: 'Pricing on request', key: false, notes: 'Refreshed when new models ship' },
-    { service: 'Negotiation at renewal', price: '[20 to 30]% of first-year savings', key: false, notes: 'For teams spending $250K+ a year. No savings, no fee.' },
-  ],
-  footnote: "We don't resell credits. Savings are measured against your current effective rates at the same usage.",
 };
 
 export const faq = {
@@ -235,7 +214,7 @@ export const faq = {
     },
     {
       q: 'What if there are no savings?',
-      a: "Then the teardown says so, and you have a dated record that your setup is sound. It costs nothing. For negotiation, the fee is a share of first-year savings, so no savings means no fee.",
+      a: "Then the teardown says so, and you have a dated record that your setup is sound.",
     },
     {
       q: 'Which providers do you cover?',
@@ -252,8 +231,7 @@ export const getStarted = {
   label: 'Get started',
   heading: 'Get a free teardown.',
   body: 'Tell us about your setup. We reply within 1 business day with export instructions for your providers. Your report arrives 48 hours after we receive the files.',
-  call: { lead: 'Prefer to talk first?', label: 'Book a call' },
-  emailLead: 'Or email',
+  emailLead: 'Questions first? Email',
 };
 
 export const form = {
@@ -365,7 +343,6 @@ export const footer = {
   links: [
     { label: 'How it works', href: '/#how-it-works' },
     { label: 'Sample report', href: '/sample' },
-    { label: 'Pricing', href: '/#pricing' },
     { label: 'FAQ', href: '/#faq' },
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' },
@@ -523,15 +500,13 @@ export const sample = {
 };
 
 // ---------------------------------------------------------------------------
-// Legal pages. Plain language. Must be reviewed by counsel before launch.
+// Legal pages. Plain language. "We" means ModelPar throughout.
 // ---------------------------------------------------------------------------
 export const legal = {
-  banner: '[TO BE REVIEWED BY COUNSEL]',
-  bannerNote: 'This is a plain-language draft and has not been reviewed by a lawyer yet.',
   updated: 'Last updated',
   privacy: {
     heading: 'Privacy',
-    intro: '{brand} is operated by {legalEntity}, {city}. This page explains what we collect, why, and how to have it deleted.',
+    intro: 'This page explains what {brand} collects, why, who can see it, and how to have it deleted. "We" and "us" mean {brand}.',
     sections: [
       {
         h: 'What we collect',
@@ -545,31 +520,48 @@ export const legal = {
       },
       {
         h: 'What we never ask for',
-        p: ['API keys, console access, source code, or your customers\' data. The teardown does not need any of these.'],
+        p: ["API keys, console access, source code, or your customers' data. The teardown does not need any of these."],
       },
       {
         h: 'How we use it',
         p: [
-          'To reply to you, prepare your teardown and any later work you ask for, and to build the anonymized Comps benchmark from terms you chose to contribute. We do not sell your data or use it for advertising.',
+          'To reply to you, prepare your teardown and any later work you ask for, and build the anonymized Comps benchmark from terms you chose to contribute.',
+          'We do not sell your data, use it for advertising, or share it with AI providers. We do not use your files to train models.',
+        ],
+      },
+      {
+        h: 'Who can see it',
+        p: [
+          'Only the people at {brand} working on your teardown see your files. Other customers never see your data. Comps shows contributed terms only in anonymized bands, as described below.',
         ],
       },
       {
         h: 'Comps and anonymization',
         p: [
-          'Contributed terms are stored without your company name and shown only in bands. A band is never shown with fewer than 3 companies. You can withdraw your contribution at any time.',
-        ],
-      },
-      {
-        h: 'Retention and deletion',
-        p: [
-          'Files you send are deleted when you ask, and automatically 90 days after we receive them. Email {email} to request deletion of anything we hold about you.',
+          'Contributed terms are stored without your company name and shown only in bands. A band is never shown with fewer than 3 companies. You can withdraw your contribution at any time, and it is removed from future versions of the benchmark.',
         ],
       },
       {
         h: 'Service providers',
         p: [
-          'We use a small number of providers to run this site and our work: [FORM_PROVIDER] to receive form submissions, [EMAIL_PROVIDER] for email, [FILE_STORAGE] for files you send, [HOSTING_PROVIDER] to host the site, and Plausible for analytics.',
+          'We use a small number of service providers to host this site, receive form submissions, send email and store the files you send, plus Plausible for analytics. They process data only to provide those services to us, and may not use it for their own purposes. Email {email} for the current list.',
         ],
+      },
+      {
+        h: 'Retention and deletion',
+        p: [
+          'Files you send are deleted when you ask, and automatically 90 days after we receive them. The finished report and our email with you are kept so we can answer follow-up questions, until you ask us to delete them.',
+        ],
+      },
+      {
+        h: 'Your choices',
+        p: [
+          'You can ask for a copy of the personal data we hold about you, ask us to correct it, or ask us to delete it. Email {email} and we will respond within 30 days.',
+        ],
+      },
+      {
+        h: 'Changes',
+        p: ['If we change this page, we update the date at the top. If a change affects how we use data you already sent, we tell you by email first.'],
       },
       {
         h: 'Contact',
@@ -579,47 +571,60 @@ export const legal = {
   },
   terms: {
     heading: 'Terms',
-    intro: 'These terms cover your use of the {brand} website and services, provided by {legalEntity}, {city}.',
+    intro: 'These terms cover your use of the {brand} website and services. By using them, you agree to these terms. "We" and "us" mean {brand}.',
     sections: [
       {
         h: 'The services',
         p: [
-          'The teardown is free. Comps is free for teams that contribute their terms. The model and effort map and the negotiation service are paid and are covered by a separate written agreement before work starts.',
+          'The teardown and Comps are described on our homepage. The model and effort map and negotiation at renewal are provided under a separate written agreement. If that agreement conflicts with these terms, the agreement applies.',
         ],
       },
       {
         h: 'Estimates, not guarantees',
         p: [
-          'Teardowns, routing cards and benchmarks are estimates based on the data you provide and on providers\' published prices at the time. Prices and models change. You decide what to change in your systems and contracts.',
+          "Teardowns, routing cards and benchmarks are estimates based on the data you provide and on providers' published prices at the time. Prices and models change. You decide what to change in your systems and contracts, and you are responsible for testing changes before you make them.",
         ],
       },
       {
         h: 'Your data',
         p: [
-          'You keep ownership of everything you send us. You confirm you are allowed to share it. We handle it as described in our Privacy page. A mutual NDA is available on request.',
+          'You keep ownership of everything you send us. You confirm you are allowed to share it with us. We handle it as described on the Privacy page.',
+          'If you contribute terms to Comps, you confirm that your agreements with your providers allow it.',
         ],
+      },
+      {
+        h: 'Confidentiality',
+        p: [
+          'We keep the files and terms you send confidential and use them only to provide services to you and, if you opt in, to build Comps. A mutual NDA is available on request; if you sign one with us, it applies alongside these terms.',
+        ],
+      },
+      {
+        h: 'Acceptable use',
+        p: ["Don't use the site to break the law, send malware or spam, or try to access data that isn't yours."],
       },
       {
         h: 'Independence',
+        p: ['{brand} is independent and not affiliated with any AI provider. Product and model names belong to their owners. We do not resell credits or tokens.'],
+      },
+      {
+        h: 'No warranty',
         p: [
-          '{brand} is independent and not affiliated with any AI provider. Product and model names belong to their owners. We do not resell credits.',
+          'The website, teardowns and benchmarks are provided "as is", without warranties of any kind, to the extent the law allows.',
         ],
       },
       {
-        h: 'Negotiation fees',
+        h: 'Limitation of liability',
         p: [
-          'For negotiation, the fee is [20 to 30]% of first-year savings, measured against your current effective rates at the same usage. If there are no savings, there is no fee. Exact terms are set in the written agreement.',
+          'To the extent the law allows, {brand} is not liable for indirect, incidental, special or consequential damages, or for lost profits, revenue or savings. For any claim related to the website, a teardown or Comps, our total liability is limited to $100. For work under a written agreement, the liability terms in that agreement apply.',
         ],
       },
       {
-        h: 'Liability',
-        p: [
-          '[LIABILITY TERMS: to be drafted by counsel.]',
-        ],
+        h: 'Governing law',
+        p: ['These terms are governed by the laws of the State of California. Any dispute goes to the state or federal courts in San Diego County, California.'],
       },
       {
         h: 'Changes and contact',
-        p: ['We may update these terms and will change the date above when we do. Questions: {email}.'],
+        p: ['We may update these terms and will change the date at the top when we do. Questions: {email}.'],
       },
     ],
   },

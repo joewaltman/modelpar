@@ -28,7 +28,7 @@ npm run build && npm run preview
 
 | To change | Edit |
 | --- | --- |
-| Brand name, domain, email, calendar link, form endpoint, legal entity, founder details | `src/config.ts` |
+| Brand name, domain, email, form endpoint, founder details | `src/config.ts` |
 | Every word on the site, including the sample report, form, legal pages and 404 | `src/content/copy.ts` |
 | Sample report numbers: prices, token volumes, seats, engineers | `src/content/sample-data.ts` |
 | How the sample numbers are calculated | `src/lib/sample.ts` |
@@ -39,17 +39,11 @@ Copy strings can use `{tokens}` such as `{totalSpend}` or `{company}`. They are 
 
 ## Before launch: fill these in
 
-Run `npm run check:copy` to list every placeholder still visible on the site. Today that is:
+Only one placeholder is left: `formEndpoint` in `src/config.ts` (`[FORM_ENDPOINT]`). Until it is set, the form can't deliver submissions (see "Set up the form" below). `npm run check:copy` lists any bracketed placeholder that shows up on a page.
 
-- `src/config.ts`: `calLink` (`[CAL_LINK]`), `formEndpoint` (`[FORM_ENDPOINT]`), `legalEntity` (`[LLC NAME]`), `founder.photo` (empty shows initials).
-- `src/content/copy.ts`:
-  - Negotiation fee `[20 to 30]%` (pricing table, step 4, terms).
-  - Founder bio: `[roles]` and `[Earlier company acquired by Twitter, confirm wording]`.
-  - Privacy: `[FORM_PROVIDER]`, `[EMAIL_PROVIDER]`, `[FILE_STORAGE]`, `[HOSTING_PROVIDER]`.
-  - Terms: `[LIABILITY TERMS: ...]`.
-- Both legal pages carry a `[TO BE REVIEWED BY COUNSEL]` banner (`legal.banner` in `copy.ts`). Remove it once a lawyer has reviewed them.
+The founder photo is `public/joe-waltman.jpg` (398px square). To replace it, drop in a new square image and update `founder.photo` in `src/config.ts`.
 
-For the founder photo, put a square image in `public/` (for example `public/joe.jpg`, at least 320px) and set `founder.photo: '/joe.jpg'`.
+The site shows no pricing for ModelPar's own services. Keep it that way unless that decision changes.
 
 ## Set up the form
 

@@ -9,14 +9,10 @@ export const site = {
   url: 'https://modelpar.com',
   email: 'joe@modelpar.com',
 
-  // Booking link for "Book a call", e.g. https://cal.com/joewaltman/20min
-  calLink: '[CAL_LINK]',
-
   // Where the teardown form posts. Formspree example: https://formspree.io/f/abcdwxyz
   // Any endpoint that accepts a form POST and returns JSON { ok: true } works.
   formEndpoint: '[FORM_ENDPOINT]',
 
-  legalEntity: '[LLC NAME]',
   city: 'San Diego, CA',
   updated: 'Nov 2026',
 
@@ -25,7 +21,7 @@ export const site = {
     role: 'Founder',
     linkedin: 'https://www.linkedin.com/in/joewaltman',
     // Path under /public, e.g. '/joe.jpg'. Leave empty to show the placeholder.
-    photo: '',
+    photo: '/joe-waltman.jpg',
   },
 
   // Plausible analytics. Loaded only in production builds. No cookies, so no banner.

@@ -12,15 +12,14 @@ import Laptop from '@lucide/astro/icons/laptop';
 import Trash from '@lucide/astro/icons/trash';
 import Users from '@lucide/astro/icons/users';
 import Signature from '@lucide/astro/icons/signature';
-import { site, isPlaceholder } from '../config';
-import { meta, hero, problem, steps, samplePreview, data, founder, pricing, faq, getStarted } from '../content/copy';
+import { site } from '../config';
+import { meta, hero, problem, steps, samplePreview, data, founder, faq, getStarted } from '../content/copy';
 
 const icons = { file: FileSpreadsheet, 'eye-off': EyeOff, laptop: Laptop, trash: Trash, users: Users, signature: Signature } as const;
 const initials = site.founder.name
   .split(' ')
   .map((w) => w[0])
   .join('');
-const hasCal = !isPlaceholder(site.calLink);
 ---
 
 <Base title={meta.home.title} description={meta.home.description} path="/">
@@ -102,10 +101,6 @@ const hasCal = !isPlaceholder(site.calLink);
                 <dt class="label mb-1">{steps.fields.time}</dt>
                 <dd class="m-0">{s.time}</dd>
               </div>
-              <div>
-                <dt class="label mb-1">{steps.fields.cost}</dt>
-                <dd class:list={['m-0 font-medium', s.costIsKey && 'text-accent']}>{s.cost}</dd>
-              </div>
             </dl>
           </li>
         ))
@@ -153,7 +148,7 @@ const hasCal = !isPlaceholder(site.calLink);
       <div class="md:col-span-3" aria-hidden="true">
         {
           site.founder.photo ? (
-            <img src={site.founder.photo} alt={founder.photoAlt} width="160" height="160" class="h-24 w-24 rounded-lg border border-rule object-cover md:h-40 md:w-40" />
+            <img src={site.founder.photo} alt={founder.photoAlt} width="160" height="160" loading="lazy" decoding="async" class="h-24 w-24 rounded-lg border border-rule object-cover md:h-40 md:w-40" />
           ) : (
             <div class="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-rule-strong bg-surface-2 md:h-40 md:w-40">
               <span class="num text-[22px] text-ink-2 md:text-[28px]">{initials}</span>
@@ -178,44 +173,7 @@ const hasCal = !isPlaceholder(site.calLink);
     </div>
   </Section>
 
-  <!-- 7. Pricing -->
-  <Section id="pricing" label={pricing.label} heading={pricing.heading}>
-    <div class="table-wrap rounded-lg border border-rule bg-surface">
-      <table class="data stack pricing-table" role="table">
-        <thead role="rowgroup">
-          <tr role="row">
-            {
-              pricing.columns.map((c) => (
-                <th scope="col" role="columnheader">
-                  {c}
-                </th>
-              ))
-            }
-          </tr>
-        </thead>
-        <tbody role="rowgroup">
-          {
-            pricing.rows.map((r) => (
-              <tr role="row">
-                <th scope="row" role="rowheader" data-title>
-                  {r.service}
-                </th>
-                <td role="cell" class:list={['num text-[15px]', r.key ? 'font-semibold text-accent' : 'text-ink']}>
-                  {r.price}
-                </td>
-                <td role="cell" class="text-[15px] text-ink-2">
-                  {r.notes}
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-    </div>
-    <p class="mt-5 text-[15px] text-ink-2">{pricing.footnote}</p>
-  </Section>
-
-  <!-- 8. FAQ -->
+  <!-- 7. FAQ -->
   <Section id="faq" label={faq.label} heading={faq.heading}>
     <dl class="m-0 border-t border-rule">
       {
@@ -229,7 +187,7 @@ const hasCal = !isPlaceholder(site.calLink);
     </dl>
   </Section>
 
-  <!-- 9. Get started -->
+  <!-- 8. Get started -->
   <Section id="get-started">
     <div class="grid gap-10 md:grid-cols-12">
       <div class="md:col-span-5">
@@ -237,22 +195,7 @@ const hasCal = !isPlaceholder(site.calLink);
         <h2 id="get-started-heading" class="text-[32px] font-semibold leading-[1.1] tracking-[-0.02em] md:text-[40px]">{getStarted.heading}</h2>
         <p class="mt-4 text-ink-2">{getStarted.body}</p>
         <div class="mt-8 border-t border-rule pt-6 text-[15px]">
-          <p class="text-ink-2">{getStarted.call.lead}</p>
-          <p class="mt-1">
-            {
-              hasCal ? (
-                <a class="link inline-flex items-center gap-1 font-medium" href={site.calLink} rel="noopener">
-                  {getStarted.call.label}
-                  <ArrowUpRight size={14} aria-hidden="true" />
-                </a>
-              ) : (
-                <span class="font-medium">
-                  {getStarted.call.label} <span class="num text-ink-2">{site.calLink}</span>
-                </span>
-              )
-            }
-          </p>
-          <p class="mt-4 text-ink-2">
+          <p class="text-ink-2">
             {getStarted.emailLead}{' '}
             <a class="link" href={`mailto:${site.email}`}>
               {site.email}
@@ -289,38 +232,5 @@ const hasCal = !isPlaceholder(site.calLink);
     .preview-crop {
       max-height: 640px;
     }
-  }
-  .pricing-table th,
-  .pricing-table td {
-    padding: 16px 20px;
-  }
-  .pricing-table th[scope='row'] {
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--ink);
-  }
-  @media (max-width: 639.98px) {
-    .pricing-table tr {
-      padding: 14px 18px;
-    }
-    .pricing-table tr:last-child {
-      border-bottom: 0;
-    }
-    .pricing-table tbody tr:first-child {
-      border-top: 0;
-    }
-    .pricing-table th[scope='row'],
-    .pricing-table td {
-      padding: 2px 0;
-    }
-  }
-  .pricing-table thead th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-  .pricing-table tbody tr:last-child th,
-  .pricing-table tbody tr:last-child td {
-    border-bottom: 0;
   }
 </style>
