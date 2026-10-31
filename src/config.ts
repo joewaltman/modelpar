@@ -11,7 +11,7 @@ export const site = {
 
   // Where the teardown form posts. Formspree example: https://formspree.io/f/abcdwxyz
   // Any endpoint that accepts a form POST and returns JSON { ok: true } works.
-  formEndpoint: '[FORM_ENDPOINT]',
+  formEndpoint: 'https://formspree.io/f/xpppydod',
 
   city: 'San Diego, CA',
   updated: 'Nov 2026',

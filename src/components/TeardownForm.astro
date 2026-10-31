@@ -231,6 +231,9 @@ const labelCls = 'mb-1.5 block text-[14px] font-medium';
       status.hidden = true;
       if (!validate()) return;
       const data = new FormData(formEl);
+      // Put the company in the email subject so requests are easy to scan in the inbox.
+      const company = String(data.get('company') || '').trim();
+      if (company) data.set('_subject', `${data.get('_subject')}: ${company}`);
 
       if (!configured) {
         // Local development: show the confirmation without sending anything.

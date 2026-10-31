@@ -39,7 +39,7 @@ Copy strings can use `{tokens}` such as `{totalSpend}` or `{company}`. They are 
 
 ## Before launch: fill these in
 
-Only one placeholder is left: `formEndpoint` in `src/config.ts` (`[FORM_ENDPOINT]`). Until it is set, the form can't deliver submissions (see "Set up the form" below). `npm run check:copy` lists any bracketed placeholder that shows up on a page.
+No placeholders are left. `npm run check:copy` lists any bracketed placeholder that shows up on a page.
 
 The founder photo is `public/joe-waltman.jpg` (398px square). To replace it, drop in a new square image and update `founder.photo` in `src/config.ts`.
 
@@ -47,18 +47,12 @@ The site shows no pricing for ModelPar's own services. Keep it that way unless t
 
 ## Set up the form
 
-The form posts to any endpoint that accepts a standard form POST and returns JSON. Formspree is the simplest:
+The form posts to Formspree at `https://formspree.io/f/xpppydod` (`formEndpoint` in `src/config.ts`). Each submission is emailed to the address set on that form in Formspree and kept in the Formspree dashboard. The subject line includes the company name, for example "Teardown request: Example Co.".
 
-1. Create a free account at formspree.io and a new form. Set the notification email to `joe@modelpar.com`.
-2. Copy the endpoint, which looks like `https://formspree.io/f/abcdwxyz`.
-3. Paste it into `formEndpoint` in `src/config.ts`.
+Fields sent: `name`, `email`, `company`, `providers` (one entry per selected provider), `spend`, `renewal`, `notes`, plus `_subject` and a `_gotcha` honeypot for spam, both of which Formspree understands. To switch services, replace the endpoint with any URL that accepts a form POST and returns JSON. Basin and Getform also work with the same field names.
 
-Fields sent: `name`, `email`, `company`, `providers` (one entry per selected provider), `spend`, `renewal`, `notes`, plus `_subject` and a `_gotcha` honeypot for spam, both of which Formspree understands. Basin and Getform also work with the same field names.
-
-Until the endpoint is set:
-
-- In `npm run dev`, submitting shows the confirmation screen without sending anything, so you can test it.
-- In a production build, the form shows a message asking people to email you instead. With JavaScript off, the form opens an email to `site.email`.
+- If a submission fails, the form asks the person to email `site.email` instead. With JavaScript off, the form posts straight to Formspree, which shows its own thank-you page.
+- `npm run screenshots` answers form posts itself, so test runs never reach your inbox. Submitting the form by hand in `npm run dev` does send a real submission.
 
 Successful submissions also record a `Teardown Request` event in Plausible. To see it, add a custom event goal with that name in Plausible.
 

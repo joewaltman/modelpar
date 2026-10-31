@@ -27,6 +27,8 @@ const browser = await chromium.launch();
 for (const [w, h] of widths) {
   for (const theme of themes) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: theme, deviceScaleFactor: 1 });
+    // Answer form posts here so test submissions never reach the real inbox.
+    await ctx.route(/formspree\.io/, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     const page = await ctx.newPage();
     for (const [name, path] of pages) {
       await page.goto(base + path, { waitUntil: 'networkidle' });
@@ -49,7 +51,7 @@ for (const [w, h] of widths) {
       console.log(file, `${w}x${total}`);
     }
 
-    // Form confirmation state (works in dev, where the form isn't connected yet).
+    // Form confirmation state, with the form endpoint mocked above.
     await page.goto(base + '/#get-started', { waitUntil: 'networkidle' });
     await page.fill('#f-name', 'Ada Lovelace');
     await page.fill('#f-email', 'ada@example.com');
